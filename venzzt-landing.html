@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Venzzt — Aprende a operar los mercados</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05050a;
+  --ink:#0d0d18;
+  --white:#f5f4f0;
+  --muted:rgba(245,244,240,.45);
+  --faint:rgba(245,244,240,.12);
+  --line:rgba(245,244,240,.08);
+  --gold:#c9a96e;
+  --gold-dim:rgba(201,169,110,.12);
+  --gold-line:rgba(201,169,110,.3);
+  --red:#e05252;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--white);
+  overflow-x:hidden;
+  line-height:1;
+}
+
+/* ─── GRAIN overlay ─── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:999;opacity:.7;
+}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.5rem 3.5rem;
+  mix-blend-mode:normal;
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.45rem;font-weight:400;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--white);text-decoration:none;
+}
+.nav-links{display:flex;gap:2.5rem;list-style:none;align-items:center}
+.nav-links a{
+  font-size:.75rem;font-weight:400;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);text-decoration:none;
+  transition:color .25s;
+}
+.nav-links a:hover{color:var(--white)}
+.nav-btn{
+  font-size:.72rem;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--bg);background:var(--gold);
+  padding:.6rem 1.6rem;border:none;cursor:pointer;text-decoration:none;
+  transition:opacity .2s;
+}
+.nav-btn:hover{opacity:.85}
+
+/* ─── HERO ─── */
+.hero{
+  position:relative;min-height:100vh;
+  display:grid;place-items:center;
+  text-align:center;padding:8rem 2rem 6rem;
+  overflow:hidden;
+}
+/* atmospheric glow */
+.hero-glow{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:900px;height:600px;
+  background:radial-gradient(ellipse at 50% 20%, rgba(201,169,110,.09) 0%, transparent 65%);
+  pointer-events:none;
+}
+/* thin horizontal line */
+.hero-line{
+  position:absolute;top:50%;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line),transparent);
+}
+.hero-inner{position:relative;z-index:2;max-width:900px;margin:0 auto}
+
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:.75rem;
+  font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:3rem;
+  animation:riseUp .8s .1s both;
+}
+.hero-kicker::before,.hero-kicker::after{
+  content:'';display:inline-block;width:32px;height:1px;background:var(--gold-line);
+}
+
+.hero-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3.5rem,9vw,8rem);
+  font-weight:300;line-height:.95;
+  letter-spacing:-.01em;
+  margin-bottom:2.5rem;
+  animation:riseUp .8s .2s both;
+}
+.hero-headline em{font-style:italic;color:var(--gold)}
+
+.hero-sub{
+  font-size:clamp(.95rem,1.8vw,1.1rem);
+  font-weight:300;color:var(--muted);
+  max-width:520px;margin:0 auto 3.5rem;
+  line-height:1.8;
+  animation:riseUp .8s .35s both;
+}
+
+.hero-actions{
+  display:flex;flex-direction:column;align-items:center;gap:1rem;
+  animation:riseUp .8s .5s both;
+}
+.btn-hero{
+  display:inline-block;
+  font-size:.8rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  padding:1.1rem 3.5rem;
+  background:transparent;
+  border:1px solid var(--gold-line);
+  color:var(--white);text-decoration:none;
+  position:relative;overflow:hidden;
+  transition:color .3s,border-color .3s;
+}
+.btn-hero::before{
+  content:'';position:absolute;inset:0;
+  background:var(--gold);transform:translateX(-101%);transition:transform .35s ease;
+}
+.btn-hero:hover{color:var(--bg);border-color:var(--gold)}
+.btn-hero:hover::before{transform:translateX(0)}
+.btn-hero span{position:relative;z-index:1}
+
+.hero-note{
+  font-size:.72rem;color:rgba(245,244,240,.25);
+  display:flex;align-items:center;gap:.5rem;letter-spacing:.04em;
+}
+.hero-note::before{content:'—';color:var(--red);opacity:.6}
+
+/* ─── DIVIDER ─── */
+.divider{
+  width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line) 30%,var(--line) 70%,transparent);
+}
+
+/* ─── TICKER ─── */
+.ticker-wrap{
+  overflow:hidden;padding:1rem 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.ticker-track{
+  display:flex;gap:3.5rem;width:max-content;
+  animation:tickMove 25s linear infinite;
+}
+@keyframes tickMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tick-item{
+  display:flex;align-items:center;gap:.6rem;
+  font-size:.72rem;letter-spacing:.08em;white-space:nowrap;color:var(--muted);
+}
+.tick-sym{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.9rem;font-weight:500;color:var(--white);letter-spacing:.1em;
+}
+.tick-up{color:#6fcf97}.tick-dn{color:var(--red)}
+
+/* ─── SECTION COMMON ─── */
+.section{padding:8rem 2rem}
+.section-inner{max-width:1060px;margin:0 auto}
+
+.label{
+  font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.25rem;display:block;
+}
+.heading{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.4rem,5vw,4.2rem);font-weight:300;
+  line-height:1.1;
+}
+.heading em{font-style:italic;color:var(--gold)}
+
+/* ─── ABOUT / SPLIT ─── */
+.split{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:6rem;align-items:center;
+}
+.split-img{
+  position:relative;aspect-ratio:4/5;
+  background:linear-gradient(160deg,#1a1820,#0d0c14);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:6rem;color:var(--line);font-style:italic;
+}
+.img-badge{
+  position:absolute;bottom:-1px;right:-1px;
+  background:var(--gold);color:var(--bg);
+  padding:1.1rem 1.4rem;
+  font-size:.68rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+}
+.img-badge strong{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2.2rem;font-weight:300;display:block;line-height:1;letter-spacing:0;
+}
+.split-body .heading{margin-bottom:1.5rem}
+.split-body p{
+  font-size:.95rem;font-weight:300;color:var(--muted);
+  line-height:1.85;margin-bottom:1rem;
+}
+.chips{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.5rem}
+.chip{
+  font-size:.68rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);padding:.35rem .9rem;color:rgba(245,244,240,.35);
+}
+
+/* ─── NUMBERS ROW ─── */
+.numbers-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line);
+}
+.num-box{
+  padding:3rem 2rem;border-right:1px solid var(--line);
+  text-align:left;
+}
+.num-box:last-child{border-right:none}
+.num-val{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.8rem,5vw,4.5rem);font-weight:300;
+  color:var(--gold);line-height:1;margin-bottom:.5rem;display:block;
+}
+.num-label{font-size:.78rem;font-weight:300;color:var(--muted);line-height:1.5}
+
+/* ─── CURRICULUM ─── */
+.curriculum-section{background:linear-gradient(180deg,var(--bg) 0%,#0c0b14 100%)}
+.curriculum-header{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:4rem;
+}
+.curriculum-grid{display:flex;flex-direction:column;gap:0}
+.mod-row{
+  display:grid;grid-template-columns:80px 1fr auto;
+  align-items:center;gap:2rem;
+  padding:1.75rem 0;
+  border-bottom:1px solid var(--line);
+  cursor:default;
+  transition:background .2s;
+}
+.mod-row:first-child{border-top:1px solid var(--line)}
+.mod-row:hover{background:rgba(201,169,110,.04);padding-left:1rem;padding-right:1rem;margin:0 -1rem}
+.mod-n{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;font-weight:300;color:var(--line);
+  letter-spacing:.05em;
+}
+.mod-info h3{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.35rem;font-weight:400;margin-bottom:.3rem;
+}
+.mod-info p{font-size:.8rem;font-weight:300;color:var(--muted);line-height:1.6}
+.mod-tag{
+  font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);border:1px solid var(--gold-line);
+  padding:.3rem .8rem;white-space:nowrap;
+}
+
+/* ─── FOR WHOM ─── */
+.forwho-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--line);
+  border:1px solid var(--line);
+  margin-top:3.5rem;
+}
+.forwho-card{
+  background:var(--bg);padding:2.5rem 2rem;
+  transition:background .2s;
+}
+.forwho-card:hover{background:#0e0d18}
+.fcard-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:3rem;font-weight:300;color:var(--line);
+  line-height:1;margin-bottom:1.2rem;
+}
+.fcard-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.2rem;font-weight:400;margin-bottom:.75rem;
+}
+.fcard-desc{font-size:.82rem;font-weight:300;color:var(--muted);line-height:1.7}
+
+/* ─── TESTIMONIALS ─── */
+.testi-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+  margin-top:3.5rem;
+}
+.testi-card{
+  border:1px solid var(--line);padding:2rem;
+  position:relative;
+}
+.testi-card::before{
+  content:'\201C';
+  font-family:'Cormorant Garamond',serif;
+  font-size:4rem;font-weight:300;color:var(--gold);
+  position:absolute;top:-1rem;left:1.5rem;line-height:1;opacity:.5;
+}
+.testi-body{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.05rem;font-weight:300;font-style:italic;
+  line-height:1.7;color:rgba(245,244,240,.75);margin-bottom:1.5rem;
+}
+.testi-result{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.8rem;font-weight:300;color:var(--gold);
+  line-height:1;margin-bottom:.3rem;
+}
+.testi-who{font-size:.72rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+
+/* ─── FORM SECTION ─── */
+.form-section{padding:8rem 2rem;position:relative;overflow:hidden}
+.form-glow{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:700px;height:400px;
+  background:radial-gradient(ellipse,rgba(201,169,110,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.form-inner{
+  max-width:1060px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:6rem;align-items:start;
+}
+.form-left{}
+.form-left .heading{margin-bottom:1.5rem}
+.form-left p{font-size:.9rem;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:2rem}
+.form-perks{display:flex;flex-direction:column;gap:.9rem}
+.perk{display:flex;align-items:center;gap:.75rem;font-size:.82rem;font-weight:300;color:var(--muted)}
+.perk::before{
+  content:'';width:16px;height:1px;background:var(--gold);flex-shrink:0;
+}
+
+/* FORM CARD */
+.form-card{
+  border:1px solid var(--line);padding:2.5rem;background:#0a0912;
+}
+.form-card-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.5rem;font-weight:300;margin-bottom:.35rem;
+}
+.form-card-sub{font-size:.78rem;font-weight:300;color:var(--muted);margin-bottom:2rem;line-height:1.6}
+
+.frow{margin-bottom:.9rem}
+.flabel{
+  display:block;font-size:.65rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:.45rem;
+}
+.finput,.fselect{
+  width:100%;background:#06050f;
+  border:1px solid var(--line);
+  padding:.85rem 1rem;font-size:.88rem;
+  font-family:'DM Sans',sans-serif;
+  color:var(--white);outline:none;
+  appearance:none;-webkit-appearance:none;
+  transition:border-color .2s;
+}
+.finput::placeholder{color:rgba(245,244,240,.18)}
+.finput:focus,.fselect:focus{border-color:var(--gold-line)}
+.fselect{
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem;
+}
+.fselect option{background:#0a0912;color:var(--white)}
+
+.phone-row{display:flex;gap:.5rem}
+.fprefix{
+  width:105px;flex-shrink:0;background:#06050f;
+  border:1px solid var(--line);padding:.85rem .7rem;
+  font-size:.85rem;font-family:'DM Sans',sans-serif;
+  color:var(--white);outline:none;appearance:none;-webkit-appearance:none;
+  cursor:pointer;transition:border-color .2s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .4rem center;padding-right:1.4rem;
+}
+.fprefix:focus{border-color:var(--gold-line)}
+.fprefix option,.fselect option{background:#0a0912}
+
+.ferr{font-size:.68rem;color:var(--red);margin-top:.3rem;display:none}
+.finput.err,.fselect.err,.fprefix.err{border-color:rgba(224,82,82,.45)}
+
+.fconsent{display:flex;gap:.6rem;align-items:flex-start;margin:1.25rem 0 .5rem}
+.fconsent input[type=checkbox]{
+  width:15px;height:15px;flex-shrink:0;margin-top:2px;
+  accent-color:var(--gold);cursor:pointer;
+}
+.fconsent label{font-size:.72rem;color:rgba(245,244,240,.3);line-height:1.5;cursor:pointer}
+.fconsent a{color:rgba(201,169,110,.6);text-decoration:none}
+.fconsent a:hover{color:var(--gold)}
+
+.fsubmit{
+  width:100%;margin-top:.75rem;
+  font-family:'DM Sans',sans-serif;
+  font-size:.75rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  padding:1.05rem;
+  background:var(--gold);color:var(--bg);
+  border:none;cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:opacity .2s,transform .15s;
+}
+.fsubmit:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+.fsubmit:disabled{opacity:.45;cursor:not-allowed}
+
+.fsuccess{
+  display:none;padding:2.5rem 0;text-align:center;
+}
+.fsuccess-icon{
+  font-size:2.5rem;margin-bottom:1rem;display:block;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.fsuccess-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.8rem;font-weight:300;color:var(--gold);margin-bottom:.5rem;
+}
+.fsuccess-sub{font-size:.85rem;font-weight:300;color:var(--muted);line-height:1.7}
+
+.floader{
+  display:inline-block;width:14px;height:14px;
+  border:1.5px solid rgba(5,5,10,.3);border-top-color:var(--bg);
+  border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#fApiErr{text-align:center;font-size:.72rem;color:var(--red);margin-top:.75rem;display:none}
+
+/* ─── FAQ ─── */
+.faq-list{margin-top:3rem;border-top:1px solid var(--line)}
+.faq-item{border-bottom:1px solid var(--line);padding:1.5rem 0;cursor:pointer}
+.faq-q{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.15rem;font-weight:400;
+}
+.faq-q .ico{
+  font-size:1.2rem;color:var(--gold);
+  transition:transform .3s;flex-shrink:0;margin-left:1rem;
+}
+.faq-item.open .ico{transform:rotate(45deg)}
+.faq-a{
+  font-size:.85rem;font-weight:300;color:var(--muted);
+  line-height:1.8;max-height:0;overflow:hidden;
+  transition:max-height .35s ease,padding .25s;
+}
+.faq-item.open .faq-a{max-height:200px;padding-top:.9rem}
+
+/* ─── FOOTER ─── */
+footer{
+  padding:3rem 3.5rem;
+  border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
+}
+.footer-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.1rem;font-weight:400;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(245,244,240,.3);
+}
+.footer-legal{font-size:.68rem;color:rgba(245,244,240,.18);line-height:1.6;max-width:480px;text-align:right}
+
+/* ─── ANIMATIONS ─── */
+@keyframes riseUp{
+  from{opacity:0;transform:translateY(28px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  nav{padding:1.25rem 1.5rem}
+  .nav-links{display:none}
+  .split,.form-inner{grid-template-columns:1fr;gap:3rem}
+  .numbers-row{grid-template-columns:1fr}
+  .num-box{border-right:none;border-bottom:1px solid var(--line);padding:2rem 1rem}
+  .forwho-grid,.testi-grid{grid-template-columns:1fr}
+  .curriculum-header{flex-direction:column;align-items:flex-start;gap:1rem}
+  .mod-row{grid-template-columns:50px 1fr}
+  .mod-tag{display:none}
+  .section{padding:5rem 1.5rem}
+  .form-card{padding:1.75rem 1.25rem}
+  footer{flex-direction:column;text-align:center}
+  .footer-legal{text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <a href="#" class="nav-logo">Venzzt</a>
+  <ul class="nav-links">
+    <li><a href="#metodo">Método</a></li>
+    <li><a href="#curriculum">Programa</a></li>
+    <li><a href="#acceso">Acceso</a></li>
+  </ul>
+  <a href="#acceso" class="nav-btn">Acceder al curso</a>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-line"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker">Curso de trading · Edición 2025</div>
+    <h1 class="hero-headline">
+      Opera los mercados<br>
+      con <em>claridad</em><br>
+      y precisión
+    </h1>
+    <p class="hero-sub">
+      Un programa diseñado para quienes quieren entender los mercados de verdad — no seguir señales ciegas, sino desarrollar un criterio propio y consistente.
+    </p>
+    <div class="hero-actions">
+      <a href="#acceso" class="btn-hero"><span>Quiero acceder →</span></a>
+      <span class="hero-note">Sin atajos. Sin promesas vacías.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TICKER ══ -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="tick-item"><span class="tick-sym">BTC / USD</span>&emsp;87.420&emsp;<span class="tick-up">▲ +2.4%</span></span>
+    <span class="tick-item"><span class="tick-sym">EUR / USD</span>&emsp;1.0821&emsp;<span class="tick-dn">▼ −0.3%</span></span>
+    <span class="tick-item"><span class="tick-sym">GOLD</span>&emsp;3.118&emsp;<span class="tick-up">▲ +1.1%</span></span>
+    <span class="tick-item"><span class="tick-sym">S&amp;P 500</span>&emsp;5.204&emsp;<span class="tick-dn">▼ −0.8%</span></span>
+    <span class="tick-item"><span class="tick-sym">ETH / USD</span>&emsp;2.041&emsp;<span class="tick-up">▲ +3.2%</span></span>
+    <span class="tick-item"><span class="tick-sym">NVDA</span>&emsp;875.20&emsp;<span class="tick-up">▲ +4.1%</span></span>
+    <span class="tick-item"><span class="tick-sym">OIL (WTI)</span>&emsp;81.40&emsp;<span class="tick-dn">▼ −1.2%</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="tick-item"><span class="tick-sym">BTC / USD</span>&emsp;87.420&emsp;<span class="tick-up">▲ +2.4%</span></span>
+    <span class="tick-item"><span class="tick-sym">EUR / USD</span>&emsp;1.0821&emsp;<span class="tick-dn">▼ −0.3%</span></span>
+    <span class="tick-item"><span class="tick-sym">GOLD</span>&emsp;3.118&emsp;<span class="tick-up">▲ +1.1%</span></span>
+    <span class="tick-item"><span class="tick-sym">S&amp;P 500</span>&emsp;5.204&emsp;<span class="tick-dn">▼ −0.8%</span></span>
+    <span class="tick-item"><span class="tick-sym">ETH / USD</span>&emsp;2.041&emsp;<span class="tick-up">▲ +3.2%</span></span>
+    <span class="tick-item"><span class="tick-sym">NVDA</span>&emsp;875.20&emsp;<span class="tick-up">▲ +4.1%</span></span>
+    <span class="tick-item"><span class="tick-sym">OIL (WTI)</span>&emsp;81.40&emsp;<span class="tick-dn">▼ −1.2%</span></span>
+  </div>
+</div>
+
+<!-- ══ NUMBERS ══ -->
+<div class="section-inner" style="max-width:1060px;margin:0 auto;padding:0 2rem">
+  <div class="numbers-row">
+    <div class="num-box">
+      <span class="num-val">+3.400</span>
+      <span class="num-label">alumnos formados<br>desde 2020</span>
+    </div>
+    <div class="num-box">
+      <span class="num-val">81%</span>
+      <span class="num-label">de alumnos en profit<br>al tercer mes</span>
+    </div>
+    <div class="num-box">
+      <span class="num-val">6</span>
+      <span class="num-label">módulos · acceso<br>de por vida</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ABOUT / SPLIT ══ -->
+<section class="section" id="metodo">
+  <div class="section-inner">
+    <div class="split">
+      <div class="split-img">
+        <!-- <img src="foto-mentor.jpg" style="width:100%;height:100%;object-fit:cover"> -->
+        V
+        <div class="img-badge">
+          <strong>8+</strong>
+          años operando
+        </div>
+      </div>
+      <div class="split-body">
+        <span class="label">El método Venzzt</span>
+        <h2 class="heading">Trading sin<br><em>ruido</em> ni superstición</h2>
+        <br>
+        <p>La mayoría de cursos enseñan a seguir indicadores que llegan tarde o patrones que funcionan el 50% del tiempo. Venzzt parte de un principio distinto: entender <em>por qué</em> se mueve el precio antes de operar.</p>
+        <p>Enseño precio puro, estructura de mercado y gestión de riesgo real. No hay atajos, pero hay un sistema que puedes repetir con confianza.</p>
+        <div class="chips">
+          <span class="chip">Price Action</span>
+          <span class="chip">Gestión de riesgo</span>
+          <span class="chip">Forex · Crypto · Índices</span>
+          <span class="chip">Psicología del trader</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ CURRICULUM ══ -->
+<section class="section curriculum-section" id="curriculum">
+  <div class="section-inner">
+    <div class="curriculum-header">
+      <div>
+        <span class="label">Programa completo</span>
+        <h2 class="heading">Qué aprenderás<br>en <em>Venzzt</em></h2>
+      </div>
+      <p style="font-size:.82rem;font-weight:300;color:var(--muted);max-width:260px;line-height:1.7;text-align:right">
+        Acceso inmediato a los 6 módulos + comunidad privada + soporte directo.
+      </p>
+    </div>
+    <div class="curriculum-grid">
+      <div class="mod-row">
+        <span class="mod-n">01</span>
+        <div class="mod-info">
+          <h3>Fundamentos del mercado</h3>
+          <p>Cómo funciona el precio, quién lo mueve y por qué la mayoría pierde desde el principio.</p>
+        </div>
+        <span class="mod-tag">Base</span>
+      </div>
+      <div class="mod-row">
+        <span class="mod-n">02</span>
+        <div class="mod-info">
+          <h3>Lectura de precio y estructura</h3>
+          <p>Identificar tendencias, zonas de interés y contexto de mercado sin indicadores.</p>
+        </div>
+        <span class="mod-tag">Core</span>
+      </div>
+      <div class="mod-row">
+        <span class="mod-n">03</span>
+        <div class="mod-info">
+          <h3>Gestión del riesgo y las cuentas</h3>
+          <p>El único factor que separa a los traders que sobreviven de los que no.</p>
+        </div>
+        <span class="mod-tag">Crítico</span>
+      </div>
+      <div class="mod-row">
+        <span class="mod-n">04</span>
+        <div class="mod-info">
+          <h3>Sistema de entradas y salidas</h3>
+          <p>Reglas claras para saber cuándo entrar, dónde sale el stop y cuándo tomar ganancias.</p>
+        </div>
+        <span class="mod-tag">Core</span>
+      </div>
+      <div class="mod-row">
+        <span class="mod-n">05</span>
+        <div class="mod-info">
+          <h3>Psicología y disciplina</h3>
+          <p>Cómo operar cuando el mercado va en tu contra y mantener la mente fría.</p>
+        </div>
+        <span class="mod-tag">Mentalidad</span>
+      </div>
+      <div class="mod-row">
+        <span class="mod-n">06</span>
+        <div class="mod-info">
+          <h3>Estrategias avanzadas y backtesting</h3>
+          <p>Valida tu sistema en datos históricos y ajústalo antes de arriesgar capital real.</p>
+        </div>
+        <span class="mod-tag">Avanzado</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ FOR WHOM ══ -->
+<section class="section">
+  <div class="section-inner">
+    <span class="label">¿Es para ti?</span>
+    <h2 class="heading">Venzzt es para quienes<br><em>toman esto en serio</em></h2>
+    <div class="forwho-grid">
+      <div class="forwho-card">
+        <div class="fcard-num">01</div>
+        <h3 class="fcard-title">Empiezas desde cero</h3>
+        <p class="fcard-desc">No necesitas experiencia previa. El programa está estructurado para que alguien sin base llegue a operar con sistema propio.</p>
+      </div>
+      <div class="forwho-card">
+        <div class="fcard-num">02</div>
+        <h3 class="fcard-title">Ya llevas tiempo pero pierdes</h3>
+        <p class="fcard-desc">Conoces los conceptos básicos pero el resultado no llega. Venzzt te ayuda a identificar exactamente qué está fallando.</p>
+      </div>
+      <div class="forwho-card">
+        <div class="fcard-num">03</div>
+        <h3 class="fcard-title">Buscas consistencia, no golpes de suerte</h3>
+        <p class="fcard-desc">No enseñamos a hacerse rico en una operación. Enseñamos a construir un edge repetible a lo largo del tiempo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section class="section" style="background:#070611">
+  <div class="section-inner">
+    <span class="label">Resultados reales</span>
+    <h2 class="heading">Lo que dicen quienes<br>ya <em>pasaron por aquí</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <p class="testi-body">Llevaba dos años perdiendo de forma consistente. No era falta de análisis — era que no tenía sistema. Venzzt me dio eso.</p>
+        <div class="testi-result">+$1.840 / mes</div>
+        <div class="testi-who">Carlos M. · Forex · México</div>
+      </div>
+      <div class="testi-card">
+        <p class="testi-body">El módulo de gestión de riesgo solo ya justifica el precio del curso. Antes quemaba cuentas cada dos meses. Llevo seis meses en positivo.</p>
+        <div class="testi-result">+$3.200 / mes</div>
+        <div class="testi-who">Ana R. · Crypto · España</div>
+      </div>
+      <div class="testi-card">
+        <p class="testi-body">Vine con experiencia pero sin criterio propio. El programa me obligó a formalizar algo que intuía y hacerlo repetible. Gran diferencia.</p>
+        <div class="testi-result">+$640 primera semana</div>
+        <div class="testi-who">Diego F. · Índices · Argentina</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FORM ══ -->
+<section class="form-section" id="acceso">
+  <div class="form-glow"></div>
+  <div class="form-inner">
+
+    <div class="form-left">
+      <span class="label">Accede ahora</span>
+      <h2 class="heading">Empieza a operar<br>con un <em>sistema real</em></h2>
+      <br>
+      <p>Completa el formulario y recibirás acceso inmediato al programa, la comunidad privada y soporte directo.</p>
+      <div class="form-perks">
+        <span class="perk">Acceso de por vida a los 6 módulos</span>
+        <span class="perk">Comunidad privada de traders</span>
+        <span class="perk">Soporte por email y WhatsApp</span>
+        <span class="perk">Actualizaciones incluidas sin coste</span>
+        <span class="perk">Garantía de 14 días sin preguntas</span>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <!-- SUCCESS STATE -->
+      <div class="fsuccess" id="formSuccess">
+        <span class="fsuccess-icon">✦</span>
+        <p class="fsuccess-title">Bienvenido a Venzzt</p>
+        <p class="fsuccess-sub">Revisa tu correo — te enviamos el acceso al programa en los próximos minutos.</p>
+      </div>
+
+      <!-- FIELDS -->
+      <div id="formFields">
+        <p class="form-card-title">Solicita tu acceso</p>
+        <p class="form-card-sub">Te contactamos en menos de 24 h para confirmar tu plaza.</p>
+
+        <div class="frow">
+          <label class="flabel" for="f-name">Nombre completo</label>
+          <input class="finput" id="f-name" type="text" placeholder="Tu nombre" autocomplete="name"/>
+          <span class="ferr" id="err-name">Ingresa tu nombre completo.</span>
+        </div>
+
+        <div class="frow">
+          <label class="flabel" for="f-email">Email</label>
+          <input class="finput" id="f-email" type="email" placeholder="tu@correo.com" autocomplete="email"/>
+          <span class="ferr" id="err-email">Ingresa un email válido.</span>
+        </div>
+
+        <div class="frow">
+          <label class="flabel" for="f-country">País</label>
+          <select class="fselect" id="f-country">
+            <option value="">Selecciona…</option>
+            <option>Argentina</option><option>Bolivia</option><option>Chile</option>
+            <option>Colombia</option><option>Costa Rica</option><option>Ecuador</option>
+            <option>El Salvador</option><option>España</option><option>Estados Unidos</option>
+            <option>Guatemala</option><option>Honduras</option><option>México</option>
+            <option>Nicaragua</option><option>Panamá</option><option>Paraguay</option>
+            <option>Perú</option><option>Puerto Rico</option>
+            <option>República Dominicana</option><option>Uruguay</option>
+            <option>Venezuela</option><option>Otro</option>
+          </select>
+          <span class="ferr" id="err-country">Selecciona tu país.</span>
+        </div>
+
+        <div class="frow">
+          <label class="flabel" for="f-phone">WhatsApp</label>
+          <div class="phone-row">
+            <select class="fprefix" id="f-prefix">
+              <option value="+54">🇦🇷 +54</option><option value="+591">🇧🇴 +591</option>
+              <option value="+56">🇨🇱 +56</option><option value="+57">🇨🇴 +57</option>
+              <option value="+506">🇨🇷 +506</option><option value="+593">🇪🇨 +593</option>
+              <option value="+503">🇸🇻 +503</option><option value="+34">🇪🇸 +34</option>
+              <option value="+1">🇺🇸 +1</option><option value="+502">🇬🇹 +502</option>
+              <option value="+504">🇭🇳 +504</option><option value="+52">🇲🇽 +52</option>
+              <option value="+505">🇳🇮 +505</option><option value="+507">🇵🇦 +507</option>
+              <option value="+595">🇵🇾 +595</option>
+              <option value="+51" selected>🇵🇪 +51</option>
+              <option value="+1787">🇵🇷 +1787</option><option value="+1809">🇩🇴 +1809</option>
+              <option value="+598">🇺🇾 +598</option><option value="+58">🇻🇪 +58</option>
+            </select>
+            <input class="finput" id="f-phone" type="tel" placeholder="987 654 321" autocomplete="tel"/>
+          </div>
+          <span class="ferr" id="err-phone">Ingresa un número válido.</span>
+        </div>
+
+        <div class="fconsent">
+          <input type="checkbox" id="f-consent"/>
+          <label for="f-consent">Acepto recibir información del curso por email y WhatsApp. Puedo darme de baja cuando quiera. <a href="#">Privacidad</a>.</label>
+        </div>
+        <span class="ferr" id="err-consent">Debes aceptar para continuar.</span>
+
+        <button class="fsubmit" id="fSubmit" onclick="handleSubmit()">
+          Solicitar acceso →
+        </button>
+        <p id="fApiErr"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section class="section" style="padding-top:4rem">
+  <div class="section-inner" style="max-width:720px">
+    <span class="label">Preguntas frecuentes</span>
+    <h2 class="heading">¿Tienes <em>dudas?</em></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">¿Necesito experiencia previa en trading? <span class="ico">+</span></div>
+        <div class="faq-a">No. El programa está estructurado desde cero. Si ya tienes experiencia, los módulos avanzados te serán especialmente útiles.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Cuánto tiempo necesito por semana? <span class="ico">+</span></div>
+        <div class="faq-a">Con 3-4 horas semanales puedes avanzar a buen ritmo. El acceso es de por vida, así que puedes ir a tu propio paso.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Qué mercados cubre el curso? <span class="ico">+</span></div>
+        <div class="faq-a">Forex, criptomonedas e índices bursátiles. La metodología es transferible a cualquier mercado líquido.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Hay garantía de devolución? <span class="ico">+</span></div>
+        <div class="faq-a">Sí. Tienes 14 días para revisarlo y si no te convence te devolvemos el importe completo, sin preguntas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <span class="footer-logo">Venzzt</span>
+  <p class="footer-legal">Los resultados mostrados corresponden a alumnos reales y no garantizan resultados futuros. El trading implica riesgo de pérdida de capital. Opera solo con dinero que puedas permitirte perder. © 2025 Venzzt. Todos los derechos reservados.</p>
+</footer>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+// ══════════════════════════════════════════
+//  ⚙️  CONFIGURACIÓN MAILERLITE
+//  1. app.mailerlite.com → Integrations → API → copia tu key
+//  2. Subscribers → Groups → crea "Venzzt" → copia el ID
+// ══════════════════════════════════════════
+const ML_API_KEY  = 'TU_API_KEY_AQUI';
+const ML_GROUP_ID = 'TU_GRUPO_ID_AQUI';
+// ══════════════════════════════════════════
+
+// FAQ accordion
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+// Validation helpers
+function setErr(fid, eid, show) {
+  const f = document.getElementById(fid);
+  const e = document.getElementById(eid);
+  if (show) { f?.classList.add('err'); e.style.display = 'block'; }
+  else       { f?.classList.remove('err'); e.style.display = 'none'; }
+}
+
+function validate() {
+  const name    = document.getElementById('f-name').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  const country = document.getElementById('f-country').value;
+  const phone   = document.getElementById('f-phone').value.replace(/\s/g,'');
+  const consent = document.getElementById('f-consent').checked;
+
+  const v = {
+    name:    name.length >= 2,
+    email:   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    country: country !== '',
+    phone:   /^\d{6,15}$/.test(phone),
+    consent,
+  };
+  setErr('f-name',    'err-name',    !v.name);
+  setErr('f-email',   'err-email',   !v.email);
+  setErr('f-country', 'err-country', !v.country);
+  setErr('f-phone',   'err-phone',   !v.phone);
+  document.getElementById('err-consent').style.display = v.consent ? 'none' : 'block';
+  return v.name && v.email && v.country && v.phone && v.consent;
+}
+
+async function handleSubmit() {
+  document.getElementById('fApiErr').style.display = 'none';
+  if (!validate()) return;
+
+  const btn = document.getElementById('fSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="floader"></span>';
+
+  const name    = document.getElementById('f-name').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  const country = document.getElementById('f-country').value;
+  const prefix  = document.getElementById('f-prefix').value;
+  const phone   = prefix + document.getElementById('f-phone').value.replace(/\s/g,'');
+  const parts   = name.split(' ');
+
+  try {
+    const res = await fetch('https://connect.mailerlite.com/api/subscribers', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Accept':        'application/json',
+        'Authorization': `Bearer ${ML_API_KEY}`,
+      },
+      body: JSON.stringify({
+        email,
+        fields: {
+          name:      parts[0],
+          last_name: parts.slice(1).join(' ') || '',
+          country,
+          phone,
+        },
+        groups:      [ML_GROUP_ID],
+        status:      'active',
+        opted_in_at: new Date().toISOString(),
+      }),
+    });
+
+    if (res.status === 200 || res.status === 201) {
+      document.getElementById('formFields').style.display  = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+      document.querySelector('.form-card').scrollIntoView({ behavior:'smooth', block:'center' });
+    } else {
+      throw new Error('status ' + res.status);
+    }
+  } catch(e) {
+    console.error(e);
+    const err = document.getElementById('fApiErr');
+    err.style.cssText = 'display:block;text-align:center;font-size:.72rem;color:var(--red);margin-top:.75rem';
+    err.textContent = 'Algo salió mal. Inténtalo de nuevo en unos segundos.';
+    btn.disabled = false;
+    btn.innerHTML = 'Solicitar acceso →';
+  }
+}
+
+// Clear errors on input
+['f-name','f-email','f-phone'].forEach(id => {
+  document.getElementById(id).addEventListener('input', function(){
+    this.classList.remove('err');
+    document.getElementById('err-' + id.split('-')[1]).style.display = 'none';
+  });
+});
+document.getElementById('f-country').addEventListener('change', function(){
+  this.classList.remove('err');
+  document.getElementById('err-country').style.display = 'none';
+});
+document.getElementById('f-consent').addEventListener('change', function(){
+  document.getElementById('err-consent').style.display = 'none';
+});
+</script>
+</body>
+</html>
