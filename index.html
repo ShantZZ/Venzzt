@@ -462,6 +462,136 @@ footer{
 }
 .footer-legal{font-size:.68rem;color:rgba(245,244,240,.18);line-height:1.6;max-width:480px;text-align:right}
 
+/* ─── VSL ─── */
+.vsl-section{
+  padding:0 2rem 7rem;
+  position:relative;
+}
+.vsl-inner{
+  max-width:860px;margin:0 auto;
+  display:flex;flex-direction:column;align-items:center;gap:2rem;
+}
+.vsl-label{
+  font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:.75rem;
+  animation:riseUp .8s .55s both;
+}
+.vsl-label::before,.vsl-label::after{
+  content:'';display:inline-block;width:28px;height:1px;background:var(--gold-line);
+}
+.vsl-frame{
+  width:100%;position:relative;aspect-ratio:16/9;
+  background:linear-gradient(160deg,#111020 0%,#0a0914 60%,#0d0b1a 100%);
+  border:1px solid var(--line);
+  overflow:hidden;cursor:pointer;
+  animation:riseUp .85s .65s both;
+  transition:border-color .35s;
+}
+.vsl-frame:hover{border-color:var(--gold-line)}
+
+/* atmospheric corner lines */
+.vsl-frame::before,.vsl-frame::after{
+  content:'';position:absolute;pointer-events:none;
+  border:1px solid var(--gold-line);z-index:3;
+  width:28px;height:28px;
+  transition:width .4s ease,height .4s ease;
+}
+.vsl-frame::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.vsl-frame::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+.vsl-frame:hover::before,.vsl-frame:hover::after{width:44px;height:44px}
+
+/* subtle scan-line texture */
+.vsl-scanlines{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px
+  );
+  opacity:.5;
+}
+
+/* glow behind play */
+.vsl-glow{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:340px;height:200px;
+  background:radial-gradient(ellipse,rgba(201,169,110,.06) 0%,transparent 70%);
+  pointer-events:none;z-index:1;
+  transition:opacity .35s;
+}
+.vsl-frame:hover .vsl-glow{opacity:1.6}
+
+/* thumbnail placeholder — swap for <img> or <iframe> when ready */
+.vsl-thumb{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(0deg,rgba(5,5,10,.7) 0%,transparent 50%),
+    linear-gradient(160deg,#14111e 0%,#0a0812 100%);
+  z-index:1;
+  transition:opacity .3s;
+}
+.vsl-frame:hover .vsl-thumb{opacity:.75}
+
+/* play button */
+.vsl-play{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:4;
+  display:flex;flex-direction:column;align-items:center;gap:1.1rem;
+  pointer-events:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.vsl-frame:hover .vsl-play{transform:translate(-50%,-50%) scale(1.06)}
+
+.vsl-play-ring{
+  width:76px;height:76px;border-radius:50%;
+  border:1px solid var(--gold-line);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  background:rgba(201,169,110,.07);
+  backdrop-filter:blur(4px);
+}
+.vsl-play-ring::before{
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid rgba(201,169,110,.12);
+}
+.vsl-play-triangle{
+  width:0;height:0;
+  border-top:10px solid transparent;
+  border-bottom:10px solid transparent;
+  border-left:18px solid var(--gold);
+  margin-left:4px;
+  filter:drop-shadow(0 0 8px rgba(201,169,110,.5));
+}
+.vsl-play-label{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem;font-weight:300;font-style:italic;
+  color:rgba(245,244,240,.6);letter-spacing:.06em;
+}
+
+/* bottom meta bar */
+.vsl-meta{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:.9rem 1.5rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(0deg,rgba(5,5,10,.85) 0%,transparent 100%);
+  z-index:4;
+}
+.vsl-duration{
+  font-size:.68rem;letter-spacing:.12em;color:rgba(245,244,240,.3);
+}
+.vsl-cta-inline{
+  font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:.5rem;opacity:.7;
+}
+.vsl-cta-inline::after{content:'→'}
+
+.vsl-caption{
+  font-size:.78rem;font-weight:300;color:rgba(245,244,240,.28);
+  letter-spacing:.04em;line-height:1.7;text-align:center;
+  animation:riseUp .8s .75s both;
+}
+.vsl-caption strong{color:rgba(245,244,240,.5);font-weight:400}
+
 /* ─── ANIMATIONS ─── */
 @keyframes riseUp{
   from{opacity:0;transform:translateY(28px)}
@@ -481,6 +611,9 @@ footer{
   .mod-tag{display:none}
   .section{padding:5rem 1.5rem}
   .form-card{padding:1.75rem 1.25rem}
+  .vsl-section{padding:0 1.25rem 5rem}
+  .vsl-play-ring{width:60px;height:60px}
+  .vsl-meta{padding:.7rem 1rem}
   footer{flex-direction:column;text-align:center}
   .footer-legal{text-align:center}
 }
@@ -517,6 +650,41 @@ footer{
       <a href="#acceso" class="btn-hero"><span>Quiero acceder →</span></a>
       <span class="hero-note">Sin atajos. Sin promesas vacías.</span>
     </div>
+  </div>
+</section>
+
+<!-- ══ VSL ══ -->
+<section class="vsl-section">
+  <div class="vsl-inner">
+    <div class="vsl-label">Presentación del programa</div>
+
+    <!-- Cuando tengas el video listo, reemplaza este div por:
+         <iframe src="TU_URL_EMBED" frameborder="0" allow="autoplay; fullscreen"
+                 style="position:absolute;inset:0;width:100%;height:100%"></iframe>
+         y elimina .vsl-thumb, .vsl-play y .vsl-scanlines -->
+    <div class="vsl-frame" role="button" aria-label="Ver presentación del programa"
+         onclick="this.innerHTML='<iframe src=\'\'  frameborder=\'0\' allow=\'autoplay;fullscreen\' style=\'position:absolute;inset:0;width:100%;height:100%\'></iframe>'">
+
+      <div class="vsl-scanlines"></div>
+      <div class="vsl-glow"></div>
+      <div class="vsl-thumb"></div>
+
+      <div class="vsl-play">
+        <div class="vsl-play-ring">
+          <div class="vsl-play-triangle"></div>
+        </div>
+        <span class="vsl-play-label">Ver presentación</span>
+      </div>
+
+      <div class="vsl-meta">
+        <span class="vsl-duration">14 min · gratuito</span>
+        <span class="vsl-cta-inline">Ver ahora</span>
+      </div>
+    </div>
+
+    <p class="vsl-caption">
+      Antes de acceder, mira esta presentación — <strong>entiende exactamente qué aprenderás</strong><br>y si este programa es para ti.
+    </p>
   </div>
 </section>
 
