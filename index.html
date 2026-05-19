@@ -26,6 +26,7 @@
   --ease:cubic-bezier(.16,1,.3,1);
 }
 html{scroll-behavior:smooth}
+#vsl{scroll-margin-top:4.5rem}
 body{
   font-family:'DM Sans',sans-serif;
   background:var(--bg);
@@ -893,6 +894,26 @@ const navEl = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   navEl.classList.toggle('scrolled', window.scrollY > 40);
 }, { passive:true });
+
+// Center video when clicking "Ver presentación"
+const vslButton = document.querySelector('.btn-hero[href="#vsl"]');
+if (vslButton) {
+  vslButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    const targetSection = document.getElementById('vsl');
+    const targetFrame = targetSection?.querySelector('.vsl-frame');
+    if (!targetSection || !targetFrame) {
+      window.location.hash = 'vsl';
+      return;
+    }
+
+    const frameRect = targetFrame.getBoundingClientRect();
+    const offsetTop = window.scrollY + frameRect.top;
+    const centerTop = offsetTop - (window.innerHeight - frameRect.height) / 2;
+
+    window.scrollTo({ top: Math.max(centerTop, 0), behavior: 'smooth' });
+  });
+}
 
 // Scroll reveal
 const io = new IntersectionObserver((entries) => {
