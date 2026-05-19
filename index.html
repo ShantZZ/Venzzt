@@ -60,6 +60,9 @@ main,nav,footer{position:relative;z-index:1}
 @keyframes lineGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes drawPath{to{stroke-dashoffset:0}}
 @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes particleFloat{0%{opacity:0;transform:translateY(100px) translateX(0)}50%{opacity:.6}100%{opacity:0;transform:translateY(-100px) translateX(var(--tx))}}
+@keyframes glowPulse{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
 .reveal{opacity:0;transform:translateY(30px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
 .reveal.in{opacity:1;transform:none}
@@ -453,8 +456,8 @@ footer{padding:3.5rem;border-top:1px solid var(--line);display:flex;justify-cont
 .footer-legal{font-size:.66rem;color:rgba(246,245,241,.22);line-height:1.7;max-width:500px;text-align:right}
 
 /* ─── VSL ─── */
-.vsl-section{padding:0 2rem 7rem;position:relative}
-.vsl-inner{max-width:880px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:2rem}
+.vsl-section{padding:0 2rem 7rem;position:relative;overflow:hidden}
+.vsl-inner{max-width:880px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:2rem;position:relative;z-index:2}
 .vsl-label{
   font-family:'JetBrains Mono',monospace;
   font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;
@@ -464,17 +467,22 @@ footer{padding:3.5rem;border-top:1px solid var(--line);display:flex;justify-cont
   width:100%;position:relative;aspect-ratio:16/9;
   background:linear-gradient(160deg,#100f1d 0%,#0a0914 60%,#0d0b1a 100%);
   border:1px solid var(--line);overflow:hidden;cursor:pointer;
-  transition:border-color .4s var(--ease)}
-.vsl-frame:hover{border-color:var(--gold-line)}
+  transition:border-color .4s var(--ease),box-shadow .6s var(--ease);box-shadow:0 0 0 1px rgba(205,171,115,0)}
+.vsl-frame:hover{border-color:var(--gold-line);box-shadow:0 0 40px rgba(205,171,115,.25),0 0 80px rgba(205,171,115,.1)}
 .vsl-frame::before,.vsl-frame::after{content:'';position:absolute;pointer-events:none;border:1px solid var(--gold-line);z-index:3;width:26px;height:26px;transition:width .45s var(--ease),height .45s var(--ease)}
 .vsl-frame::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
 .vsl-frame::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
 .vsl-frame:hover::before,.vsl-frame:hover::after{width:46px;height:46px}
 .vsl-scanlines{position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);opacity:.5}
-.vsl-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:360px;height:220px;background:radial-gradient(ellipse,rgba(205,171,115,.07) 0%,transparent 70%);pointer-events:none;z-index:1;transition:opacity .4s}
-.vsl-frame:hover .vsl-glow{opacity:1.6}
+.vsl-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;height:280px;background:radial-gradient(ellipse,rgba(205,171,115,.15) 0%,rgba(205,171,115,.05) 40%,transparent 70%);pointer-events:none;z-index:1;transition:opacity .5s var(--ease);animation:glowPulse 3.5s ease-in-out infinite}
+.vsl-frame:hover .vsl-glow{opacity:2;animation:glowPulse 2s ease-in-out infinite}
+.vsl-glow-secondary{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(205,171,115,.08) 0%,transparent 60%);pointer-events:none;z-index:0;filter:blur(40px)}
+.vsl-frame:hover .vsl-glow-secondary{animation:glowPulse 4s ease-in-out infinite}
 .vsl-thumb{position:absolute;inset:0;background:linear-gradient(0deg,rgba(4,4,7,.7) 0%,transparent 50%),linear-gradient(160deg,#14111e 0%,#0a0812 100%);z-index:1;transition:opacity .35s}
 .vsl-frame:hover .vsl-thumb{opacity:.75}
+.vsl-particles{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.vsl-particle{position:absolute;width:4px;height:4px;background:radial-gradient(circle,rgba(205,171,115,.8),rgba(205,171,115,.2));border-radius:50%;pointer-events:none}
+.vsl-particle.active{animation:particleFloat var(--duration) ease-out forwards}
 .vsl-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:1.1rem;pointer-events:none;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
 .vsl-frame:hover .vsl-play{transform:translate(-50%,-50%) scale(1.07)}
 .vsl-play-ring{width:78px;height:78px;border-radius:50%;border:1px solid var(--gold-line);display:flex;align-items:center;justify-content:center;position:relative;background:rgba(205,171,115,.07);backdrop-filter:blur(4px)}
@@ -565,6 +573,8 @@ footer{padding:3.5rem;border-top:1px solid var(--line);display:flex;justify-cont
     <div class="vsl-label reveal">Presentación del programa</div>
     <div class="vsl-frame reveal" data-d="1" role="button" aria-label="Ver presentación del programa"
          onclick="this.innerHTML='<iframe src=\'\'  frameborder=\'0\' allow=\'autoplay;fullscreen\' style=\'position:absolute;inset:0;width:100%;height:100%\'></iframe>'">
+      <div class="vsl-glow-secondary"></div>
+      <div class="vsl-particles"></div>
       <div class="vsl-scanlines"></div>
       <div class="vsl-glow"></div>
       <div class="vsl-thumb"></div>
@@ -954,6 +964,42 @@ document.querySelectorAll('.faq-item').forEach(item => {
     if (!isOpen) item.classList.add('open');
   });
 });
+
+// VSL Particles effect
+const vslFrame = document.querySelector('.vsl-frame');
+const particlesContainer = document.querySelector('.vsl-particles');
+if (vslFrame && particlesContainer) {
+  function createParticles() {
+    const numParticles = 12;
+    for (let i = 0; i < numParticles; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'vsl-particle';
+      const startX = Math.random() * 100;
+      const startY = Math.random() * 100;
+      const tx = (Math.random() - 0.5) * 200;
+      const duration = 2 + Math.random() * 2;
+      particle.style.left = startX + '%';
+      particle.style.top = startY + '%';
+      particle.style.setProperty('--tx', tx + 'px');
+      particle.style.setProperty('--duration', duration + 's');
+      particlesContainer.appendChild(particle);
+      particle.classList.add('active');
+      setTimeout(() => particle.remove(), duration * 1000);
+    }
+  }
+  
+  // Crear partículas al hacer hover
+  vslFrame.addEventListener('mouseenter', () => {
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => createParticles(), i * 200);
+    }
+  });
+  
+  // Crear partículas periódicamente
+  setInterval(() => {
+    if (Math.random() > 0.7) createParticles();
+  }, 2000);
+}
 
 // Validation helpers
 function setErr(fid, eid, show) {
