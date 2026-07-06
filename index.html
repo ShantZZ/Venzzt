@@ -776,19 +776,19 @@ footer{padding:3.5rem;border-top:1px solid var(--line);display:flex;justify-cont
       </div>
 
       <!-- FIELDS -->
-      <div id="formFields">
+      <form id="lead-form">
         <p class="form-card-title">Solicita tu acceso</p>
         <p class="form-card-sub">Te contactamos en menos de 24 h para confirmar tu plaza.</p>
 
         <div class="frow">
           <label class="flabel" for="f-name">Nombre completo</label>
-          <input class="finput" id="f-name" type="text" placeholder="Tu nombre" autocomplete="name"/>
+          <input class="finput" id="f-name" name="name" type="text" placeholder="Tu nombre" autocomplete="name"/>
           <span class="ferr" id="err-name">Ingresa tu nombre completo.</span>
         </div>
 
         <div class="frow">
           <label class="flabel" for="f-email">Email</label>
-          <input class="finput" id="f-email" type="email" placeholder="tu@correo.com" autocomplete="email"/>
+          <input class="finput" id="f-email" name="email" type="email" placeholder="tu@correo.com" autocomplete="email"/>
           <span class="ferr" id="err-email">Ingresa un email válido.</span>
         </div>
 
@@ -824,7 +824,7 @@ footer{padding:3.5rem;border-top:1px solid var(--line);display:flex;justify-cont
               <option value="+1787">🇵🇷 +1787</option><option value="+1809">🇩🇴 +1809</option>
               <option value="+598">🇺🇾 +598</option><option value="+58">🇻🇪 +58</option>
             </select>
-            <input class="finput" id="f-phone" type="tel" placeholder="987 654 321" autocomplete="tel"/>
+            <input class="finput" id="f-phone" name="phone" type="tel" placeholder="987 654 321" autocomplete="tel"/>
           </div>
           <span class="ferr" id="err-phone">Ingresa un número válido.</span>
         </div>
@@ -835,11 +835,11 @@ footer{padding:3.5rem;border-top:1px solid var(--line);display:flex;justify-cont
         </div>
         <span class="ferr" id="err-consent">Debes aceptar para continuar.</span>
 
-        <button class="fsubmit" id="fSubmit" onclick="handleSubmit()">
+        <button class="fsubmit" id="fSubmit" type="submit">
           <span>Solicitar acceso →</span>
         </button>
         <p id="fApiErr"></p>
-      </div>
+      </form>
     </div>
   </div>
 </section>
@@ -882,11 +882,8 @@ footer{padding:3.5rem;border-top:1px solid var(--line);display:flex;justify-cont
 <script>
 // ══════════════════════════════════════════
 //  ⚙️  CONFIGURACIÓN MAILERLITE
-//  1. app.mailerlite.com → Integrations → API → copia tu key
-//  2. Subscribers → Groups → crea "Venzzt" → copia el ID
-// ══════════════════════════════════════════
-const ML_API_KEY  = 'TU_API_KEY_AQUI';
-const ML_GROUP_ID = 'TU_GRUPO_ID_AQUI';
+//  1. En Vercel, configura MAILERLITE_API_KEY con tu JWT secreto.
+//  2. En Vercel, configura MAILERLITE_GROUP_ID con el ID del grupo.
 // ══════════════════════════════════════════
 
 // Nav background on scroll
@@ -1020,55 +1017,6 @@ function validate() {
   return v.name && v.email && v.country && v.phone && v.consent;
 }
 
-async function handleSubmit() {
-  document.getElementById('fApiErr').style.display = 'none';
-  if (!validate()) return;
-
-  const btn = document.getElementById('fSubmit');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="floader"></span>';
-
-  const name    = document.getElementById('f-name').value.trim();
-  const email   = document.getElementById('f-email').value.trim();
-  const country = document.getElementById('f-country').value;
-  const prefix  = document.getElementById('f-prefix').value;
-  const phone   = prefix + document.getElementById('f-phone').value.replace(/\s/g,'');
-  const parts   = name.split(' ');
-  try {
-    const payload = {
-      access_key: '5ac67fc1-adb6-424a-9f3d-48c6173b723b',
-      subject: `Solicitud de acceso — Venzzt`,
-      name,
-      email,
-      country,
-      phone,
-      message: `Solicitud de acceso enviada desde la web. Nombre: ${name}`,
-    };
-
-    const res = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (res.ok && data.success) {
-      document.getElementById('formFields').style.display  = 'none';
-      document.getElementById('formSuccess').style.display = 'block';
-      document.querySelector('.form-card').scrollIntoView({ behavior:'smooth', block:'center' });
-    } else {
-      throw new Error(data.message || 'Error al enviar formulario');
-    }
-  } catch (e) {
-    console.error(e);
-    const err = document.getElementById('fApiErr');
-    err.style.cssText = 'display:block;text-align:center;font-size:.72rem;color:var(--red);margin-top:.75rem';
-    err.textContent = 'No pudimos enviar tu solicitud. Intenta nuevamente.';
-    btn.disabled = false;
-    btn.innerHTML = '<span>Solicitar acceso →</span>';
-  }
-}
 
 // Clear errors on input
 ['f-name','f-email','f-phone'].forEach(id => {
@@ -1084,6 +1032,61 @@ document.getElementById('f-country').addEventListener('change', function(){
 document.getElementById('f-consent').addEventListener('change', function(){
   document.getElementById('err-consent').style.display = 'none';
 });
+</script>
+
+<script>
+// MailerLite front-end submit handler (AJAX)
+// La clave secreta se mueve al backend Vercel. El frontend solo llama a /api/subscribe.
+
+(function(){
+  const form = document.getElementById('lead-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    document.getElementById('fApiErr').style.display = 'none';
+    if (!validate()) return;
+
+    const btn = document.getElementById('fSubmit');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>Enviando...</span>';
+
+    try {
+      const name = document.getElementById('f-name').value.trim();
+      const email = document.getElementById('f-email').value.trim();
+      const country = document.getElementById('f-country').value;
+      const prefix = document.getElementById('f-prefix').value;
+      const phone = prefix + document.getElementById('f-phone').value.replace(/\s/g,'');
+
+      const body = { name, email, country, phone };
+
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+        document.querySelector('.form-card').scrollIntoView({ behavior:'smooth', block:'center' });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'status ' + res.status);
+      }
+    } catch (err) {
+      console.error(err);
+      const errEl = document.getElementById('fApiErr');
+      errEl.style.cssText = 'display:block;text-align:center;font-size:.72rem;color:var(--red);margin-top:.75rem';
+      errEl.textContent = 'Algo salió mal. Intenta de nuevo más tarde.';
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+    }
+  });
+})();
 </script>
 </body>
 </html>
