@@ -1034,41 +1034,37 @@ async function handleSubmit() {
   const prefix  = document.getElementById('f-prefix').value;
   const phone   = prefix + document.getElementById('f-phone').value.replace(/\s/g,'');
   const parts   = name.split(' ');
-
   try {
-    const res = await fetch('https://connect.mailerlite.com/api/subscribers', {
+    const payload = {
+      access_key: '5ac67fc1-adb6-424a-9f3d-48c6173b723b',
+      subject: `Solicitud de acceso — Venzzt`,
+      name,
+      email,
+      country,
+      phone,
+      message: `Solicitud de acceso enviada desde la web. Nombre: ${name}`,
+    };
+
+    const res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Accept':        'application/json',
-        'Authorization': `Bearer ${ML_API_KEY}`,
-      },
-      body: JSON.stringify({
-        email,
-        fields: {
-          name:      parts[0],
-          last_name: parts.slice(1).join(' ') || '',
-          country,
-          phone,
-        },
-        groups:      [ML_GROUP_ID],
-        status:      'active',
-        opted_in_at: new Date().toISOString(),
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
 
-    if (res.status === 200 || res.status === 201) {
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.success) {
       document.getElementById('formFields').style.display  = 'none';
       document.getElementById('formSuccess').style.display = 'block';
       document.querySelector('.form-card').scrollIntoView({ behavior:'smooth', block:'center' });
     } else {
-      throw new Error('status ' + res.status);
+      throw new Error(data.message || 'Error al enviar formulario');
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     const err = document.getElementById('fApiErr');
     err.style.cssText = 'display:block;text-align:center;font-size:.72rem;color:var(--red);margin-top:.75rem';
-    err.textContent = 'Algo salió mal. Inténtalo de nuevo en unos segundos.';
+    err.textContent = 'No pudimos enviar tu solicitud. Intenta nuevamente.';
     btn.disabled = false;
     btn.innerHTML = '<span>Solicitar acceso →</span>';
   }
